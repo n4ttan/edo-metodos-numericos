@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EDO - Métodos Numéricos</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,'Segoe UI',Roboto,sans-serif;background:#eef7f1;color:#0b1f3a}
+header{background:linear-gradient(135deg,#0b1f3a,#14396b);color:#fff;padding:32px 40px;border-bottom:5px solid #7be0a0}
+header h1{margin:0 0 6px;font-size:28px}header .sub{color:#b8f0cc;margin:0 0 18px}
+.meta{display:flex;flex-wrap:wrap;gap:12px}
+.meta div{background:rgba(123,224,160,.14);border:1px solid rgba(123,224,160,.45);border-radius:10px;padding:8px 14px}
+.meta small{display:block;color:#7be0a0;font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+main{max-width:1200px;margin:28px auto;padding:0 24px}
+.card{background:#fff;border-radius:14px;box-shadow:0 4px 18px rgba(11,31,58,.12);padding:24px;margin-bottom:22px}
+h2{margin:0 0 14px;color:#0b1f3a}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.campo label{display:block;font-weight:700;margin-bottom:5px}
+.campo .duo{display:flex;gap:10px}
+.campo .duo div{flex:1}
+.campo .duo small.t{display:block;font-size:12px;color:#4a6a5a;margin-bottom:2px}
+input,select{width:100%;padding:10px 12px;border:2px solid #b8d9c4;border-radius:8px;font-size:16px;color:#0b1f3a;background:#fbfefc;font-family:ui-monospace,Consolas,monospace}
+select{font-family:inherit}
+input:focus,select:focus{outline:none;border-color:#14396b;box-shadow:0 0 0 3px rgba(123,224,160,.5)}
+.desc{margin:6px 0 0;font-size:13px;line-height:1.45;color:#3d5c4d}
+.desc code{background:#d4f5e0;color:#0b3d2a;border-radius:4px;padding:1px 5px}
+.full{grid-column:1/-1}
+.acoes{display:flex;flex-wrap:wrap;gap:12px;margin-top:20px;align-items:center}
+button{background:#0b1f3a;color:#7be0a0;border:2px solid #7be0a0;border-radius:8px;padding:10px 20px;font-weight:600;font-size:15px;cursor:pointer;transition:.15s}
+button:hover{background:#7be0a0;color:#0b1f3a}
+button.sec{background:#fff;color:#0b1f3a;border-color:#0b1f3a}
+button.sec:hover{background:#0b1f3a;color:#7be0a0}
+#erro{display:none;margin-top:16px;background:#fdecea;border-left:5px solid #c0392b;color:#7b241c;padding:12px 16px;border-radius:6px}
+.params{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.params span{background:#d4f5e0;color:#0b3d2a;border-radius:999px;padding:4px 12px;font-size:14px}
+.scroll{overflow-x:auto;margin-top:16px}
+table{border-collapse:collapse;width:100%;min-width:760px;font-variant-numeric:tabular-nums}
+th,td{padding:9px 12px;text-align:right;border-bottom:1px solid #d9e6dd}
+th{background:#0b1f3a;color:#b8f0cc;font-size:13px}
+th:first-child,td:first-child{text-align:center;font-weight:600}
+tbody tr:nth-child(even){background:#f3fbf6}tbody tr:hover{background:#d4f5e0}
+td:nth-child(7){background:#e6f9ed;font-weight:600}th:nth-child(7){background:#1f8f5a;color:#fff}
+tr.e td{background:#0b1f3a!important;color:#7be0a0;font-weight:700;border:0}
+.nota{font-size:13px;color:#3d5c4d;margin-top:10px}
+#res{display:none}
+footer{text-align:center;color:#4a6a5a;font-size:13px;padding:8px 0 28px}
+@media print{body{background:#fff}.entrada,button{display:none}.card{box-shadow:none}#res{display:block!important}
+*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<header>
+  <h1>EDO — Equações Diferenciais Ordinárias</h1>
+  <p class="sub">Comparação de métodos numéricos para problemas de valor inicial</p>
+  <div class="meta">
+    <div><small>Autor</small>Nattan Silva Montel</div>
+    <div><small>Professor</small>Laudo Claumir</div>
+    <div><small>Matéria</small>EDO - Equações Diferenciais Ordinárias</div>
+    <div><small>Data</small>23/11/2026</div>
+    <div><small>Feito em</small>C</div>
+  </div>
+</header>
+<main>
+<form class="card entrada" id="form" autocomplete="off">
+  <h2>Dados de entrada</h2>
+  <div class="campo full" style="margin-bottom:18px">
+    <label for="ex">Carregar um exemplo (opcional)</label>
+    <select id="ex"><option value="">— digitar os meus próprios dados —</option></select>
+    <p class="desc">Preenche todos os campos abaixo com um problema pronto (do mais fácil ao mais difícil). Você pode editar depois.</p>
+  </div>
+  <div class="grid">
+    <div class="campo">
+      <label>Intervalo [a, b]</label>
+      <div class="duo">
+        <div><small class="t">a (início)</small><input id="a" inputmode="decimal" placeholder="0" required></div>
+        <div><small class="t">b (fim)</small><input id="b" inputmode="decimal" placeholder="2" required></div>
+      </div>
+      <p class="desc">Dois números, um em cada caixa (<b>sem vírgula separando</b> os dois). Precisa valer <code>a &lt; b</code>. Decimais com <b>ponto</b>: <code>0.5</code>, não <code>0,5</code>. Ex.: a = <code>0</code>, b = <code>2</code>.</p>
+    </div>
+    <div class="campo">
+      <label for="y0">y(a) — valor inicial</label>
+      <input id="y0" inputmode="decimal" placeholder="0.5" required>
+      <p class="desc">Valor de y no ponto <code>x = a</code>. Um número só, com <b>ponto</b> decimal; pode ser negativo (<code>-1</code>). Ex.: <code>0.5</code>.</p>
+    </div>
+    <div class="campo">
+      <label for="n">Quantidade de pontos n</label>
+      <input id="n" inputmode="numeric" placeholder="11" required>
+      <p class="desc">Número <b>inteiro</b> de 2 a 10000, sem vírgula nem ponto. Conta os pontos incluindo <code>a</code> e <code>b</code>, então o passo é <code>h = (b−a)/(n−1)</code>. Ex.: n = <code>11</code> em [0, 2] dá h = 0.2.</p>
+    </div>
+    <div class="campo full">
+      <label for="f">f(x, y) — da equação y' = f(x, y)</label>
+      <input id="f" placeholder="y - x^2 + 1" required>
+      <p class="desc">Escreva só o lado direito, <b>sem</b> <code>y' =</code> e <b>sem</b> <code>f(x,y) =</code>. Variáveis <code>x</code> e <code>y</code> (minúsculas). Operadores: <code>+ - * / ^</code> e parênteses. <b>Multiplicação sempre com <code>*</code></b>: <code>2*x*y</code>, não <code>2xy</code>. Funções: <code>sin cos tan asin acos atan exp log (ln) sqrt abs sinh cosh tanh</code>, com o argumento entre parênteses: <code>exp(-x)</code>. Constantes: <code>pi</code> e <code>e</code>. <b>Vírgula não é usada</b>; decimais com ponto. Ex.: <code>y - x^2 + 1</code>.</p>
+    </div>
+    <div class="campo full">
+      <label for="df">df(x, y) — derivada total de f</label>
+      <input id="df" placeholder="-2*x + y - x^2 + 1" required>
+      <p class="desc">Derivada total de f em relação a x: <code>df = ∂f/∂x + (∂f/∂y)·f</code>. Mesma sintaxe de f, e <b>também sem vírgula</b>. Só o Taylor de 2ª ordem usa este campo. Ex.: se <code>f = y - x^2 + 1</code>, então <code>∂f/∂x = -2x</code>, <code>∂f/∂y = 1</code> e <code>df = -2*x + (y - x^2 + 1)</code>.</p>
+    </div>
+    <div class="campo full">
+      <label for="exata">Solução exata y(x) — opcional</label>
+      <input id="exata" placeholder="(x+1)^2 - 0.5*exp(x)">
+      <p class="desc">Só a variável <code>x</code> (não use <code>y</code>), mesma sintaxe de f, e já com a constante do seu y(a) calculada. Ex.: <code>(x+1)^2 - 0.5*exp(x)</code>. <b>Se deixar vazio</b>, a coluna "Solução Exata" mostra uma solução de referência (RK4 com passo 100 vezes menor).</p>
+    </div>
+  </div>
+  <div class="acoes">
+    <button type="submit">Calcular</button>
+    <button type="button" class="sec" id="limpar">Limpar</button>
+  </div>
+  <div id="erro"></div>
+</form>
+
+<section class="card" id="res">
+  <h2>Resultado</h2>
+  <div class="params" id="params"></div>
+  <button type="button" onclick="window.print()">Exportar PDF</button>
+  <div class="scroll"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>
+  <p class="nota" id="nota"></p>
+</section>
+</main>
+<footer>Cálculo feito por programa em C (<code>edo.c</code>, <code>math.h</code>)</footer>
+
+<script>
+const EX = [
+ ["y' = x",                    0,2,0,11,"x","1","x^2/2"],
+ ["y' = y",                    0,1,1,11,"y","y","exp(x)"],
+ ["y' = x + y",                0,2,0.5,21,"x+y","1+x+y","1.5*exp(x)-x-1"],
+ ["y' = y - x² + 1",           0,2,0.5,11,"y - x^2 + 1","-2*x + y - x^2 + 1","(x+1)^2 - 0.5*exp(x)"],
+ ["y' = -2y + x",              0,2,1,21,"-2*y + x","1 - 2*(-2*y + x)","x/2 - 0.25 + 1.25*exp(-2*x)"],
+ ["y' = y cos(x)",             0,3,1,31,"y*cos(x)","-y*sin(x) + y*cos(x)^2","exp(sin(x))"],
+ ["y' = 2xy",                  0,1,1,21,"2*x*y","2*y + 4*x^2*y","exp(x^2)"],
+ ["y' = y/x + x  (a > 0)",     1,3,2,21,"y/x + x","-y/x^2 + 1 + (y/x + x)/x","x*(1 + x)"],
+ ["y' = y(1-y)  logística",    0,5,0.1,51,"y*(1-y)","(1-2*y)*y*(1-y)","1/(1 + 9*exp(-x))"],
+ ["y' = -50(y - cos x)  rígida (diverge com h grande)",0,2,0,11,"-50*(y - cos(x))","-50*sin(x) - 50*(-50*(y - cos(x)))","(2500*cos(x) + 50*sin(x))/2501 - 2500/2501*exp(-50*x)"],
+];
+const $ = id => document.getElementById(id);
+const IDS = ["a","b","y0","n","f","df","exata"];
+EX.forEach((e,i) => $("ex").add(new Option((i+1)+") "+e[0], i)));
+$("ex").onchange = () => { const e = EX[$("ex").value]; if (!e) return; IDS.forEach((id,k) => $(id).value = e[k+1]); };
+$("limpar").onclick = () => { IDS.forEach(id => $(id).value = ""); $("ex").value = ""; $("erro").style.display = "none"; $("res").style.display = "none"; };
+
+const NOMES = ["Taylor 1ª ordem","Taylor 2ª ordem","Euler Melhorado","Euler Modificado","Runge-Kutta 4ª","Solução Exata"];
+const fx = v => v === null ? "diverge" : String(+(+v).toPrecision(8));
+const fe = v => v === null ? "diverge" : (+v).toExponential(4);
+const esc = s => s.replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+
+$("form").onsubmit = async ev => {
+  ev.preventDefault();
+  const body = {}; IDS.forEach(id => body[id] = $(id).value.trim());
+  const er = $("erro"); er.style.display = "none";
+  let d;
+  try { d = await (await fetch("/calc", {method:"POST", body: JSON.stringify(body)})).json(); }
+  catch (x) { d = {ok:false, erro:"não consegui falar com o servidor (python3 server.py está rodando?)"}; }
+  if (!d.ok) { er.textContent = "⚠ " + d.erro; er.style.display = "block"; $("res").style.display = "none"; return; }
+  $("params").innerHTML = [`intervalo [${esc(body.a)}, ${esc(body.b)}]`,`y(a) = ${esc(body.y0)}`,`n = ${esc(body.n)} pontos`,`h = ${+d.h.toPrecision(8)}`,`y' = ${esc(body.f)}`].map(t => `<span>${t}</span>`).join("");
+  const nomes = NOMES.slice(); if (d.ref) nomes[5] = "Referência (RK4 h/100)";
+  $("th").innerHTML = "<tr><th>x</th>" + nomes.map(n => `<th>${n}</th>`).join("") + "</tr>";
+  $("tb").innerHTML = d.rows.map(r => "<tr>" + r.map((v,i) => `<td>${i ? fx(v) : (+v).toFixed(4)}</td>`).join("") + "</tr>").join("")
+    + `<tr class="e"><td>erro máx</td>${d.emax.map(v => `<td>${fe(v)}</td>`).join("")}<td>—</td></tr>`;
+  $("nota").textContent = (d.ref ? "Sem solução exata informada: a última coluna é uma referência numérica (RK4 com passo h/100). " : "") + "Erro máx = maior |y_método − y_exata| entre todos os pontos. “diverge” = valor infinito ou indefinido.";
+  $("res").style.display = "block"; $("res").scrollIntoView({behavior:"smooth"});
+};
+</script>
+</body>
+</html>
